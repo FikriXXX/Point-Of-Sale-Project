@@ -226,14 +226,15 @@ const StatCard = ({ label, value, color, icon }) => (
   </div>
 );
 
-export default function Dashboard() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [errorMsg, setErrorMsg] = useState('');
 
   useEffect(() => { fetchDashboard(); }, []);
 
   const fetchDashboard = async () => {
     setLoading(true);
+    setErrorMsg('');
     try {
       const [trxRes, prodRes] = await Promise.all([
         api.get('/transactions'),
@@ -241,6 +242,8 @@ export default function Dashboard() {
       ]);
       const transactions = trxRes.data || [];
       const products = prodRes.data || [];
+      
+      // ... (rest of the processing logic)
 
       const today = dayjs().startOf('day');
       const todayTrx = transactions.filter(t => dayjs(t.created_at).isAfter(today));
@@ -287,7 +290,10 @@ export default function Dashboard() {
         lowStock,
         chartData: last7Days
       });
-    } catch (e) { console.error(e); }
+    } catch (e) { 
+      console.error(e); 
+      setErrorMsg(e.response?.data?.error || e.message || 'Gagal terhubung ke server.');
+    }
     setLoading(false);
   };
 
@@ -305,8 +311,12 @@ export default function Dashboard() {
     <div className="dash-root">
       <style>{styles}</style>
       <div className="loading-box">
-        <p style={{ color: '#EF4444', fontWeight: 'bold' }}>Gagal memuat data dashboard.</p>
-        <button onClick={fetchDashboard} className="btn-primary" style={{ marginTop: '20px' }}>Coba Lagi</button>
+        <Icon n="alert" size={48} style={{ color: '#EF4444', marginBottom: '16px' }} />
+        <p style={{ color: '#EF4444', fontWeight: 'bold' }}>Gagal Memuat Data Dashboard</p>
+        <p style={{ fontSize: '13px', color: 'var(--text-sub)', marginTop: '8px', maxWidth: '300px', textAlign: 'center' }}>
+          Error: {errorMsg}
+        </p>
+        <button onClick={fetchDashboard} className="btn-primary" style={{ marginTop: '24px' }}>Coba Lagi</button>
       </div>
     </div>
   );

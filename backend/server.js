@@ -11,13 +11,22 @@ const supabase = require('./config/supabaseClient');
 const app = express();
 
 // CORS — hanya izinkan origin yang terdaftar
-const allowedOrigins = (process.env.ALLOWED_ORIGINS || 'http://localhost:5173').split(',');
+const allowedOrigins = [
+    'http://localhost:5173',
+    'https://point-of-sale-project-xi.vercel.app'
+];
+
 app.use(cors({
     origin: (origin, cb) => {
-        if (!origin || allowedOrigins.includes(origin)) return cb(null, true);
+        // Izinkan request tanpa origin (seperti mobile apps atau curl) atau yang ada di list
+        if (!origin || allowedOrigins.includes(origin) || process.env.NODE_ENV !== 'production') {
+            return cb(null, true);
+        }
         cb(new Error('Not allowed by CORS'));
     },
-    credentials: true
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
 // Body size limit — max 1MB
@@ -367,4 +376,8 @@ app.get('/transactions', verifyToken, async (req, res) => {
 app.post('/transactions', verifyToken, createTransaction);
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+if (process.env.NODE_ENV !== 'production') {
+    app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+}
+
+module.exports = app;
