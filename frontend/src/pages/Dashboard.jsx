@@ -217,14 +217,15 @@ const styles = `
   }
 `;
 
-const StatCard = ({ label, value, color, icon }) => (
-  <div className={`stat-card ${color}`}>
-    <div className="stat-card-glass" />
-    <div className="stat-label">{label}</div>
-    <div className="stat-value">{value}</div>
-    <div className="stat-icon"><Icon n={icon} size={48} /></div>
-  </div>
-);
+export default function Dashboard() {
+  const StatCard = ({ label, value, color, icon }) => (
+    <div className={`stat-card ${color}`}>
+      <div className="stat-card-glass" />
+      <div className="stat-label">{label}</div>
+      <div className="stat-value">{value}</div>
+      <div className="stat-icon"><Icon n={icon} size={48} /></div>
+    </div>
+  );
 
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
