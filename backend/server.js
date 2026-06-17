@@ -10,6 +10,11 @@ const supabase = require('./config/supabaseClient');
 
 const app = express();
 
+// Root route for health check and to prevent "Cannot GET /"
+app.get('/', (req, res) => {
+    res.json({ message: 'Sistem POS API is running', status: 'OK' });
+});
+
 // CORS — hanya izinkan origin yang terdaftar
 const allowedOrigins = [
     'http://localhost:5173',
