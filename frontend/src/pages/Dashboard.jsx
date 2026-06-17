@@ -177,6 +177,24 @@ const styles = `
   .action-icon { background: var(--primary-soft); color: var(--primary); padding: 10px; border-radius: 12px; }
   .action-label { font-size: 12px; font-weight: 800; }
 
+  .btn-primary { 
+    padding: 12px 24px; 
+    background: var(--primary); 
+    border: none; 
+    border-radius: 12px; 
+    color: white; 
+    font-family: 'Plus Jakarta Sans', sans-serif; 
+    font-size: 14px; 
+    font-weight: 800; 
+    cursor: pointer; 
+    transition: all 0.2s; 
+    display: inline-flex; 
+    align-items: center; 
+    gap: 8px;
+    box-shadow: 0 4px 12px rgba(217,119,6,0.2);
+  }
+  .btn-primary:hover { background: var(--primary-hover); transform: translateY(-1px); }
+
   .loading-box { 
     display: flex; flex-direction: column; align-items: center; justify-content: center; 
     height: 400px; color: var(--text-sub); 
@@ -279,6 +297,16 @@ export default function Dashboard() {
       <div className="loading-box">
         <div className="spinner" />
         <p>Menyiapkan dashboard ceria Anda...</p>
+      </div>
+    </div>
+  );
+
+  if (!data) return (
+    <div className="dash-root">
+      <style>{styles}</style>
+      <div className="loading-box">
+        <p style={{ color: '#EF4444', fontWeight: 'bold' }}>Gagal memuat data dashboard.</p>
+        <button onClick={fetchDashboard} className="btn-primary" style={{ marginTop: '20px' }}>Coba Lagi</button>
       </div>
     </div>
   );

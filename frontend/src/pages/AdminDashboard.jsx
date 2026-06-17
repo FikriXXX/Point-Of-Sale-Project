@@ -547,6 +547,14 @@ export default function AdminDashboard() {
                         </div>
                       )}
                     </td>
+                    <td>
+                      <div style={{ color: '#10B981', fontWeight: '800', fontSize: '13px' }}>
+                        +{margin.toLocaleString()}
+                      </div>
+                      <div style={{ fontSize: '10px', color: '#6B7280', fontWeight: '700' }}>
+                        {pct}% Margin
+                      </div>
+                    </td>
                     <td className="col-center">
                       <span className={`stock-badge ${getStockClass(p.stock)}`}>
                         {getStockLabel(p.stock)}

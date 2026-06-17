@@ -147,26 +147,39 @@ function App() {
     try {
       const { data, error } = await supabase.from('profiles').select('role').eq('id', userId).limit(1).maybeSingle();
       if (error) throw error;
+      let detectedRole = 'kasir';
       if (data && data.role) {
-        setRole(data.role.toLowerCase());
+        detectedRole = data.role.toLowerCase();
       } else {
-        if (userEmail === 'admin1@gmail.com') setRole('owner');
-        else setRole('kasir');
+        if (userEmail === 'admin1@gmail.com') detectedRole = 'owner';
       }
+      setRole(detectedRole);
+      // Set default page based on role
+      setActivePage(detectedRole === 'owner' ? 'dashboard' : 'kasir');
     } catch (error) {
       setRole('kasir');
+      setActivePage('kasir');
     }
   };
 
   useEffect(() => {
+    if (!supabase) return;
+
     const savedCustom = localStorage.getItem('custom_service_session');
     if (savedCustom) {
-      const parsed = JSON.parse(savedCustom);
-      setSession(parsed);
-      setRole(parsed.role.toLowerCase());
-      setAllowedMenus(parsed.allowed_features);
-      if (parsed.allowed_features && parsed.allowed_features.length > 0) {
-        setActivePage(parsed.allowed_features[0]);
+      try {
+        const parsed = JSON.parse(savedCustom);
+        setSession(parsed);
+        const userRole = parsed.role?.toLowerCase() || 'kasir';
+        setRole(userRole);
+        setAllowedMenus(parsed.allowed_features);
+        if (parsed.allowed_features && parsed.allowed_features.length > 0) {
+          setActivePage(parsed.allowed_features[0]);
+        } else {
+          setActivePage(userRole === 'owner' ? 'dashboard' : 'kasir');
+        }
+      } catch (e) {
+        localStorage.removeItem('custom_service_session');
       }
       return;
     }
@@ -174,7 +187,7 @@ function App() {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       if (session?.user?.id) fetchUserRole(session.user.id, session.user.email);
-    });
+    }).catch(err => console.error("Session fetch error:", err));
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, currentSession) => {
       const checkCustom = localStorage.getItem('custom_service_session');
@@ -183,7 +196,6 @@ function App() {
       setSession(currentSession);
       if (currentSession?.user?.id) {
         fetchUserRole(currentSession.user.id, currentSession.user.email);
-        setActivePage('kasir');
       } else {
         setRole('');
         setAllowedMenus(null);
@@ -223,6 +235,12 @@ function App() {
       }
     } catch (err) { }
 
+    if (!supabase) {
+        alert('Koneksi database belum dikonfigurasi.');
+        setLoading(false);
+        return;
+    }
+
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) alert('Kredensial login tidak valid atau tidak ditemukan.');
     setLoading(false);
@@ -233,7 +251,7 @@ function App() {
     setSession(null);
     setRole('');
     setAllowedMenus(null);
-    await supabase.auth.signOut();
+    if (supabase) await supabase.auth.signOut();
   };
 
   const allNavItems = [
@@ -282,6 +300,19 @@ function App() {
           </div>
         </div>
       </>
+    );
+  }
+
+  if (role === '' && !allowedMenus) {
+    return (
+      <div style={{ display: 'flex', height: '100vh', alignItems: 'center', justifyContent: 'center', background: '#FAF9F6', color: '#6B7280', fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
+        <style>{styles}</style>
+        <div style={{ textAlign: 'center' }}>
+          <div className="spinner" style={{ width: '40px', height: '40px', border: '4px solid #E5E7EB', borderTop: '4px solid #D97706', borderRadius: '50%', animation: 'spin 1s linear infinite', margin: '0 auto 16px' }}></div>
+          <p style={{ fontWeight: '800' }}>Memverifikasi Akses...</p>
+          <style>{`@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}</style>
+        </div>
+      </div>
     );
   }
 

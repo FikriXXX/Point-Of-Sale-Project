@@ -19,9 +19,11 @@ api.interceptors.request.use(async (config) => {
     }
 
     // Fallback ke Supabase token
-    const { data: { session } } = await supabase.auth.getSession();
-    if (session?.access_token) {
-        config.headers.Authorization = `Bearer ${session.access_token}`;
+    if (supabase) {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.access_token) {
+            config.headers.Authorization = `Bearer ${session.access_token}`;
+        }
     }
     return config;
 });
